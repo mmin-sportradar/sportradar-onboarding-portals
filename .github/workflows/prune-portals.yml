@@ -1,0 +1,57 @@
+# Copy this file into your PUBLIC GitHub Pages repo at:
+#   .github/workflows/prune-portals.yml
+#
+# It enforces portal expiry on static hosting by DELETING expired files: it reads
+# manifest.json (written by the automation when it publishes) and removes every
+# portals/<token>.html whose expiresAt is in the past, so the URL then 404s.
+# Static Pages can't return 410 — deletion is the enforcement mechanism.
+name: Prune expired onboarding portals
+
+on:
+  schedule:
+    - cron: '17 * * * *' # hourly, at :17
+  workflow_dispatch: {} # allow manual runs from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Remove expired portals
+        run: |
+          node <<'EOF'
+          const fs = require('fs');
+          const MANIFEST = 'manifest.json';
+          if (!fs.existsSync(MANIFEST)) { console.log('No manifest.json — nothing to prune.'); process.exit(0); }
+          let m = {};
+          try { m = JSON.parse(fs.readFileSync(MANIFEST, 'utf8') || '{}'); } catch (e) { console.log('Bad manifest:', e.message); process.exit(0); }
+          const now = Date.now();
+          let changed = false;
+          for (const [token, info] of Object.entries(m)) {
+            const exp = info && info.expiresAt ? new Date(info.expiresAt).getTime() : null;
+            if (exp && Number.isFinite(exp) && now > exp) {
+              const f = `portals/${token}.html`;
+              if (fs.existsSync(f)) { fs.unlinkSync(f); console.log('Removed', f); }
+              delete m[token];
+              changed = true;
+            }
+          }
+          if (changed) fs.writeFileSync(MANIFEST, JSON.stringify(m, null, 2) + '\n');
+          else console.log('Nothing expired.');
+          EOF
+
+      - name: Commit removals
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "Prune expired onboarding portals"
+            git push
+          else
+            echo "No changes to commit."
+          fi
