@@ -43,10 +43,5 @@
     "clientId": "zz-selftest-3",
     "createdAt": "2026-07-24T21:29:36.828Z",
     "expiresAt": "2026-07-25T21:29:36.828Z"
-  },
-  "ffffffffffffffffffffffff00000002": {
-    "clientId": "zz-selftest-2",
-    "createdAt": "2026-07-24T21:29:36.806Z",
-    "expiresAt": "2026-07-25T21:29:36.806Z"
   }
 }
