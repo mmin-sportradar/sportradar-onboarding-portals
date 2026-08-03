@@ -48,5 +48,10 @@
     "clientId": "78d9f9f76b88cccae97a709ff7f035ef",
     "createdAt": "2026-07-29T07:42:45.243Z",
     "expiresAt": "2026-09-12T21:59:59.999Z"
+  },
+  "aab42151b0d0a1d7b5ea0dd7cc54625a": {
+    "clientId": "3ad236ec9794525521fc42d9e34d2b0a",
+    "createdAt": "2026-08-03T12:53:34.405Z",
+    "expiresAt": null
   }
 }
